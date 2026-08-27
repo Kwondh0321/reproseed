@@ -24,6 +24,7 @@ IGNORED_DIRECTORIES = {
     "dist",
     "node_modules",
     "site-packages",
+    "tests",
 }
 TEXT_SUFFIXES = {".py", ".md", ".rst", ".txt", ".toml", ".yaml", ".yml"}
 LOCK_FILES = {"poetry.lock", "pdm.lock", "uv.lock", "pipfile.lock", "conda-lock.yml"}
@@ -133,7 +134,12 @@ class ReproducibilityAnalyzer:
         if source.is_file():
             siblings = [source]
             for candidate in source.parent.iterdir():
-                if self._is_manifest(candidate):
+                lower_name = candidate.name.lower()
+                if (
+                    self._is_manifest(candidate)
+                    or lower_name.startswith(("readme", "license", "copying", "citation"))
+                    or lower_name in {".python-version", "runtime.txt", "dockerfile", "makefile"}
+                ):
                     siblings.append(candidate)
             return sorted(set(siblings))
 
@@ -150,10 +156,12 @@ class ReproducibilityAnalyzer:
                 continue
             lower_name = path.name.lower()
             is_project_document = lower_name.startswith(("readme", "license", "copying", "citation"))
+            is_runtime_document = lower_name in {".python-version", "runtime.txt", "dockerfile", "makefile"}
             if (
                 path.suffix.lower() in TEXT_SUFFIXES | {".ipynb"}
                 or self._is_manifest(path)
                 or is_project_document
+                or is_runtime_document
             ):
                 files.append(path)
         return sorted(files)
