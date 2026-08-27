@@ -18,8 +18,8 @@ jobs:
         python-version: ["3.9", "3.11"]
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -29,4 +29,3 @@ jobs:
         run: python -m pytest
       - name: Self-check reproducibility
         run: reproseed analyze .
-
